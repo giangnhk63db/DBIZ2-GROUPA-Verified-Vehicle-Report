@@ -1,6 +1,6 @@
-# **Screen Spec: S-F03-02 Sale Request List**
+# Screen Spec: S-F03-02 Sale Request List
 
-# **1\. Purpose**
+# 1. Purpose
 
 | Field | Value |
 | ----- | ----- |
@@ -20,7 +20,7 @@
 
 **The user leaves this screen when:** the staff click the link "Xem xét" or "Xem" of a row, which opens that request in S-F03-03 (Sale Request Detail & Preliminary Quote), or click "Quay lại" (1), which returns to the previous page of Carpla CRM.
 
-## **2\. Mockup**
+## 2. Mockup
 ![S-F03-02](img/S-F03-02-default.png)
 
 | Default, numbered | Loading, numbered |
@@ -40,7 +40,7 @@
 
 Each number is the \# of the element inventory in section 3. In the default state the numbers 5 to 11 are placed on the first data row and stand for the whole column. Elements 12 and 13 appear only in the loading state, element 14 only in the empty state, elements 15 to 17 only in the error API state. All colours, fonts, spacing and corners come from the design tokens in [ui-conventions-carpla-staff.md](ui-conventions-carpla-staff.md).
 
-## **3\. Element inventory**
+## 3. Element inventory
 
 The screen is read-only: it has no Input, Upload, Date time or Security element, and no success notification. The only controls are the Back link (1), the row link (11) and the two buttons of the error popup (16, 17).
 
@@ -66,7 +66,7 @@ The screen is read-only: it has no Input, Upload, Date time or Security element,
 
 **Note**: `vehicle.` and `sale_request.` are the fields sourced from tables in the data source. The field names are proposed and will be finalized with the data dictionary. Element 6 is read from the car owner account, not from `vehicle.` or `sale_request.`.
 
-## **4\. States**
+## 4. States
 
 This screen has no input and no action that creates or saves data, so two states do not apply: Error validate FE (nothing to validate) and Success (nothing is sent). Four states are drawn.
 
@@ -79,7 +79,7 @@ This screen has no input and no action that creates or saves data, so two states
 
 **Note:** If this sale request list has two many rows, the table grows and the page scrolls vertically; no pagination, no horizontal scroll.
 
-## **5\. Interactions and navigation**
+## 5. Interactions and navigation
 
 | \# | Element | User action | System response | Goes to screen |
 | ----- | ----- | ----- | ----- | ----- |
@@ -90,7 +90,7 @@ This screen has no input and no action that creates or saves data, so two states
 | 5 | Retry (17) | tap (error popup) | Closes the popup, shows the loading state and reads the list again | stays (loading, then Default, Empty or Error API) |
 | 6 | Close (16) | tap (error popup) | Closes the popup. The screen keeps the header row only; the staff can leave with Back (1) or reopen the screen to try again | stays |
 
-## **6\. Screen-level rules**
+## 6. Screen-level rules
 
 | Rule ID | Rule | Source |
 | :---- | :---- | :---- |
@@ -107,7 +107,7 @@ This screen has no input and no action that creates or saves data, so two states
 | SR-011 | Formats: date dd/MM/yyyy HH:mm (for example 21/11/2026 08:15); price 850.000.000 ₫; VIN 17 characters without spaces. | ui-conventions section 2 |
 | SR-012 | The screen scrolls vertically only. Smallest supported width is 1280px. | ui-conventions sections 5 and 6.5 |
 
-## **7\. Linked requirements**
+## 7. Linked requirements
 
 | FR ID (L2) | What this screen does for it | L3 work items (IDs as written in the Function List) |
 | ----- | ----- | ----- |
@@ -115,7 +115,7 @@ This screen has no input and no action that creates or saves data, so two states
 | FR-03-05 Send preliminary quote to car owner | Source of the status (10): "Đã gửi báo giá" after the quote is stored | FR-03-05-FE, FR-03-05-BE (not part of this screen) |
 | FR-01-01 (VIN) and the vehicle identification fields | Source of the values of elements 7 and 8 | FR-01-01-FE, FR-01-01-BE (not part of this screen) |
 
-## **8\. Responsive and accessibility notes**
+## 8. Responsive and accessibility notes
 
 * Smallest supported width: 1280px, desktop web browser, vertical scroll only; no horizontal scroll. The column "Mẫu xe" takes the remaining width; the other columns have a fixed width.  
 * Information is never carried by colour alone: the status badges have an icon and text; the popup has an icon and text; the links are underlined.  
@@ -125,7 +125,7 @@ This screen has no input and no action that creates or saves data, so two states
 * The table uses real header cells linked to their columns for the screen reader. Each link has an accessible name that includes the owner and the VIN, for example "Xem xét yêu cầu của Nguyễn Văn An, RLHJC6101PY000123", because the visible text "Xem xét" is the same in every row.  
 * The loading line (12) is announced as a status message. The popup (15) takes the focus when it opens, keeps it inside until it closes, and returns it to the screen afterwards. The error icon and the check and warning icons of the badges have a text alternative.
 
-## **9\. Open questions**
+## 9. Open questions
 
 | \# | Question | Blocking? | Status |
 | ----- | ----- | ----- | ----- |
@@ -139,7 +139,7 @@ This screen has no input and no action that creates or saves data, so two states
 | 8 | \[NEEDS CLARIFICATION: the Status badge in ui-conventions is defined for verification and legal status only. Here it is used for the request status, with the warning style for "Chờ báo giá" and the success style for "Đã gửi báo giá".\] | No | Open. Default: keep; extend the Status badge row in ui-conventions. |
 | 9 | \[NEEDS CLARIFICATION: when a new request arrives while the list is open, does the list refresh by itself? The notification service tells the staff about a new request.\] | No | Open. Default: the list is read when the screen opens; there is no automatic refresh. |
 
-## **Completion checklist**
+## Completion checklist
 
 * \[x\] The mockup is a separate cropped image file, named with the Screen ID, at the frame width. (Four files `img/S-F03-02-*.png`, 3840 px wide = 1280 px at 3x.)  
 * \[x\] The numbered image exists, and its numbers match the \# column of the element inventory. (Four files `img/img-numbered/S-F03-02-*-numbered.png`; numbers 1 to 17 checked against the images.)  
