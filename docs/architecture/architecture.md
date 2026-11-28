@@ -1,11 +1,11 @@
-# Architecture:
+# Architecture: Verified Vehicle Report
 
 | Field | Value |
 | ----- | ----- |
 | Version | V3 Reviewed |
 | Inputs | [CVCA](https://github.com/giangnhk63db/DBIZ-2_GROUP-A/blob/fda9db825dd05ce06fdd37a9ec5f7e91539dfd4b/Context/CVCA.md), [Context Diagram](https://github.com/giangnhk63db/DBIZ-2_GROUP-A/blob/459cd34ceac5aa22e3f0283c2a89749fac32c8b6/Context/Context%20Diagram.md), [Use Case Diagram](https://github.com/giangnhk63db/DBIZ-2_GROUP-A/tree/459cd34ceac5aa22e3f0283c2a89749fac32c8b6/Use%20Case%20Diagram) |
 
-**1\. System requirements**
+## 1. System requirements
 
 | ID | Stakeholder | Stakeholder requirement | Problem | CVCA flow |
 | ----- | ----- | ----- | ----- | ----- |
@@ -41,7 +41,7 @@
 | SyR-23 | The system shall let Carpla staff send a preliminary quote for a sell request. | StR-04 |
 | SyR-24 | The system shall show the preliminary quote to the Car Owner. | StR-04 |
 
-**2\. Functional design**
+## 2. Functional design
 
 | Function | Serves |
 | ----- | ----- |
@@ -68,7 +68,7 @@
 | Send notifications | SyR-21, SyR-23 |
 | Call external data sources | SyR-02, 03, 04, 05, 08, 10, 11, 12, 13 |
 
-**3\. Physical design**
+## 3. Physical design
 
 ``` mermaid
 flowchart TB
@@ -150,7 +150,7 @@ Solid arrows run from layer to layer; dotted arrows go to external systems. Insi
 | Send notifications | Notification service | Business |
 | Keep vehicle records, invoices and invoice files, legal status, listings, price records, sell requests, quotes | Vehicle Report database | Data access |
 
-**4\. Decisions**
+## 4. Decisions
 
 | ADR | Decision | Status |
 | ----- | ----- | ----- |
