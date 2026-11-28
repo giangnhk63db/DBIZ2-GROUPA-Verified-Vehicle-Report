@@ -1,4 +1,4 @@
-# Project brief:
+# Project brief: Verified Vehicle Report
 
 | Field | Value |
 | ----- | ----- |
@@ -6,9 +6,9 @@
 | Client | Tasco Corporations |
 | Client contact | Head of Carpla Sale Department |
 | Team | Five members |
-| Course | DBIZ2 Digital Business Project II, followed by DBIZ3 (build) |
+| Course | DBIZ2 Digital Business Project II, followed by DBIZ3 |
 
-## **Problem**
+## Problem
 
 From the process researched, we identified the following pain points:
 
@@ -18,7 +18,7 @@ From the process researched, we identified the following pain points:
 - Owners have no single, reliable place to check their car’s market price. To find out what their vehicle is worth, owners must ask several different parties and compare the answers themselves, which takes effort and gives no clear basis for the figures.  
 - Vehicle information is scattered, so owners cannot easily track their vehicles. Data about a car sits in different places, and owners have no feature that integrates it in one view to follow the vehicle’s status over time.
 
-## **Goal of the project**
+## Goal of the project
 
 The project delivers a Verified Vehicle Report that gives car owners a clearer view of their vehicles and makes the preliminary quote process faster, more reliable and less demanding. It aims to:
 
@@ -30,7 +30,7 @@ The project delivers a Verified Vehicle Report that gives car owners a clearer v
 
 Measures agreed with the client are in [the CVCA](https://github.com/giangnhk63db/DBIZ-2_GROUP-A/blob/b97524e0b4e917c04f3b9b0d181db5fec1e721fa/Context/CVCA%20After.md) (stakeholder requirements) and, in money terms, in [W6 cash flow](https://github.com/giangnhk63db/DBIZ-2_GROUP-A/blob/b97524e0b4e917c04f3b9b0d181db5fec1e721fa/Function%20List/w6-cash-flow.md).
 
-## **Team and roles**
+## Team and roles
 
 | Member | Role | Owns |
 | ----- | ----- | ----- |
@@ -40,7 +40,7 @@ Measures agreed with the client are in [the CVCA](https://github.com/giangnhk63d
 | Đinh Thu Thảo | Feature owner | - F-01 Vehicle Identification and Status (activity diagram, draw screen, screen specs)<br>- Screen list<br>- Function list  |
 | Nguyễn Danh Quang | Feature owner | - F-01 Vehicle Identification and Status (use case, activity diagram, draw screen, screen specs)<br>- Usage flow<br>- Capital |
 
-## **Milestones in DBIZ2**
+## Milestones in DBIZ2
 
 | When | Milestone | What the client sees |
 | ----- | ----- | ----- |
