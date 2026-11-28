@@ -11,10 +11,10 @@
 | Trigger | Car owner selects upload external maintenance and repair invoice |
 | Preconditions | Vehicle profile exists in the system and car owner is authenticated |
 | Success end state | `stop1` (via `s6`): External invoice file is successfully validated, parsed (or manually completed by the car owner), cross-checked, and merged into the vehicle maintenance history timeline |
-| Failure end state(s) | `stop1` (via `s1` or `s7`): invoice file is rejected due to invalid format/size, or the Electronic Invoice Portal returns an invalid status; an error message is shown, nothing is merged, and the car owner closes the popup. `stop3`: the Portal returns an invalid status (or the file is rejected) and the car owner chooses Chọn tệp khác on the popup, so the car owner returns to the upload step (a file rejected at validation loops back to `m1` instead). `stop2`: the Portal API call fails on all 4 attempts (first attempt and 3 retries), the invoice is not merged and not rejected, and the car owner closes the Error API popup (the confirmed info stays on the screen) |
+| Failure end state(s) | `stop1` (via `s1` or `s7`): invoice file is rejected due to invalid format/size, or the Electronic Invoice Portal returns an invalid status; an error message is shown, nothing is merged, and the car owner closes the popup. If the car owner chooses Chọn tệp khác instead (on screen 3 or on the Portal rejection popup, screen 6), the flow does not end: it loops back to `m1` and the upload starts again. `stop2`: the Portal API call fails on all 4 attempts (first attempt and 3 retries), the invoice is not merged and not rejected, and the car owner closes the Error API popup (the confirmed info stays on the screen) |
 | FRs covered | FR-01-05-FE, FR-01-05-BE, FR-01-06-BE, FR-01-07-INT, FR-01-07-BE |
 | Business rules applied | BR-FILE-01, BR-OCR-01, BR-INV-01, BR-RET-03 |
-| Version / status | v0.5 · Reviewed |
+| Version / status | v0.6 · Reviewed |
 | Author | Đinh Thu Thảo |
 
 ## 
@@ -25,7 +25,7 @@
 
 swimlane-beta TB
   subgraph CAR["Car Owner"]
-    start@{ shape: sm-circ }
+    a_0start@{ shape: sm-circ }
     a1("Open maintenance history and select upload invoice (FR-01-05-FE)")
     m1{" "}
     a2("Upload invoice file PDF, XML, or image (FR-01-05-FE)")
@@ -40,7 +40,6 @@ swimlane-beta TB
     a3("See updated maintenance timeline or error message (FR-01-05-FE)")
     stop1@{ shape: fr-circ }
     stop2@{ shape: fr-circ }
-    stop3@{ shape: fr-circ }
   end
   subgraph SYS["TASCO Mobility System"]
     d1{"File format or size valid?"}
@@ -68,7 +67,7 @@ swimlane-beta TB
     e1("Verify via API at Electronic Invoice Portal: check seller tax code exists, invoice details match, and status is not cancelled/replaced (FR-01-07-INT)")
   end
 
-  start --> a1 --> m1 --> a2 --> d1
+  a_0start --> a1 --> m1 --> a2 --> d1
   d1 -->|"[no]"| s1 --> d_fe
   d_fe -->|"[choose another file]"| m1
   d_fe -->|"[close]"| m4
@@ -88,7 +87,7 @@ swimlane-beta TB
   d_retry -->|"[close]"| a_close --> stop2
   d3 -->|"[yes]"| s6 --> m4
   d3 -->|"[no]"| s7 --> d_rej
-  d_rej -->|"[choose another file]"| stop3
+  d_rej -->|"[choose another file]"| m1
   d_rej -->|"[close]"| m4
   m4 --> a3 --> stop1
 ```
@@ -102,7 +101,8 @@ swimlane-beta TB
 - Authentication Check: After the car owner confirms (from review or manual entry), the system sends the invoice information via API to the Electronic Invoice Portal. The Portal verifies the invoice and its response goes back to the TASCO Mobility System, which checks (`d_api`) whether the API responded successfully (no timeout, response valid). `d_api` is evaluated after every attempt, the same pattern as AD-UC-1.06.
 - Automatic retry loop (BR-RET-03): `retries done` counts the retries already made, not the attempts. After attempt 1, 2 or 3 fails, `retries done` is 0, 1 or 2 (below 3), so the system waits 2 seconds (`s9`, max 3 retries) and loops back to merge node `m3`, which sends the same confirmed info again. This gives 1 initial request plus 3 retries, 4 attempts in total, the same limit as AD-UC-1.06. During the loop the invoice is neither accepted nor rejected. Each attempt times out after 5 seconds, so the worst case for one submission is about 26 seconds (4 attempts of 5 seconds plus 3 waits of 2 seconds).
 - API Error after retries: If the 4th attempt also fails (`3 retries used`), the loop stops. The system logs the error, notifies the car owner with the Error API popup, and keeps the confirmed invoice info (`s8`); the invoice is not merged and not rejected. The popup offers two choices (`d_retry`): Thử lại sends the confirmed info again and starts a new cycle of up to 4 attempts via `m3`; Đóng closes the popup, the car owner stays on the screen with the confirmed info, and the flow ends at `stop2`.
-- Result & Timeline Update: If the Portal responded and the invoice is valid, it is merged into the vehicle's maintenance history and the updated timeline is displayed; if the Portal responded with an invalid status (or the file was rejected at validation), an error message is shown (popup "Hóa đơn không tồn tại" with Đóng and Chọn tệp khác). An invalid status is a valid response, so it is never retried. After the rejection popup, the car owner either closes it (the flow ends at `stop1`) or chooses another file, which ends this flow at `stop3` and returns the car owner to the upload step (`d_rej`); the next upload starts again at `a2`. `stop3` is drawn as a flow final instead of a loop-back edge to `m1`, because that long loop makes Mermaid render the whole diagram upside down.
+- Result & Timeline Update: If the Portal responded and the invoice is valid, it is merged into the vehicle's maintenance history and the updated timeline is displayed; if the Portal responded with an invalid status (or the file was rejected at validation), an error message is shown (popup "Hóa đơn không tồn tại" with Đóng and Chọn tệp khác). An invalid status is a valid response, so it is never retried. After the rejection popup, the car owner either closes it (the flow ends at `stop1`) or chooses another file, which loops back to `m1` (`d_rej`) and the next upload starts again at `a2`, the same as `d_fe` and `d_choice`.
+- Mermaid rendering note: the initial node is named `a_0start` on purpose. The swimlane layout finds loop-back edges with a depth-first search that visits nodes in alphabetical order of their ID, so the search must begin at the initial node. If it begins at another node (for example `a_close`), it reverses forward edges as well and the diagram is drawn upside down. When adding nodes, keep the initial node ID first in alphabetical order, and keep every retry or choose-another-file loop pointing back to a merge node (`m1`, `m3`).
 
 2. ## **Node trace**
 
@@ -143,7 +143,6 @@ swimlane-beta TB
 | a3 | Action | See updated maintenance timeline or error message | FR-01-05-FE |
 | stop1 | Final | End: invoice merged, or file or invoice rejected with an error message | N/A (Control Node) |
 | stop2 | Final | End: API error after max retries, popup closed, nothing merged | N/A (Control Node) |
-| stop3 | Final | End: invoice rejected by the Portal, car owner chooses another file and returns to the upload step | N/A (Control Node) |
 
 ## 
 
@@ -177,7 +176,7 @@ swimlane-beta TB
 | d_retry [close] | Error API popup is shown after all 4 attempts failed | Car owner chooses Đóng | System closes the popup without changing the maintenance history; the car owner stays on the screen with the confirmed info, and the flow ends at stop2 |
 | d3 [yes] | Car owner confirms invoice data and the API call to the Portal succeeded | Electronic Invoice Portal confirms invoice authenticity and returns valid status | System merges the validated external invoice into the vehicle maintenance history and displays the updated timeline |
 | d3 [no] | Car owner confirms invoice data and the API call to the Portal succeeded | Electronic Invoice Portal returns invalid, fake, or unmatched status | System rejects the invoice without retrying, prevents merging, and displays the error popup with Đóng and Chọn tệp khác |
-| d_rej [choose another file] | Error validate BE popup is shown after the Portal returned an invalid status | Car owner chooses Chọn tệp khác | System closes the popup and returns the car owner to the upload step; the flow ends at stop3 and the next upload starts again at a2 |
+| d_rej [choose another file] | Error validate BE popup is shown after the Portal returned an invalid status | Car owner chooses Chọn tệp khác | System closes the popup and returns the car owner to the upload step via m1 so the car owner can upload a new file; the next upload starts again at a2 |
 | d_rej [close] | Error validate BE popup is shown after the Portal returned an invalid status | Car owner chooses Đóng | System closes the popup without changing the maintenance history and the flow ends at stop1 |
 
 4. ## **Object states used** ## 
@@ -224,13 +223,13 @@ swimlane-beta TB
 | 7 | What is the timeout of one API attempt before it counts as failed? | No | Set to 5 seconds per attempt (BR-RET-03), so the worst case for one submission is about 26 seconds; engineering to confirm against the measured response time of the Portal (suggested timeout: about 2 times its p95, kept between 3 and 5 seconds) |
 | 8 | Should the number of Thử lại presses be capped across cycles? | No | No cap: each press is a deliberate action; use a server-side rate limit if the Portal needs protection |
 | 9 | Is repeating the verification call free of side effects on the Portal side? | No | Assumed read-only, so safe to repeat; confirm with the integration team |
-| 10 | Should Chọn tệp khác after a Portal rejection (screen 6) be a loop-back to m1? | No | Drawn as flow final stop3 because the long loop-back breaks the Mermaid layout; the loops from d_choice and d_fe to m1 are kept |
+| 10 | Should Chọn tệp khác after a Portal rejection (screen 6) be a loop-back to m1? | No | Yes: drawn as a loop-back to m1, like d_fe and d_choice. The initial node is named a_0start so that the Mermaid layout finds the loop-back edges correctly (see the Mermaid rendering note) |
 
 ## 
 
 7. ## **Verification log** ## 
 
-The diagram changed from v0.5 to v0.9 (added d_fe and d_rej so that Chọn tệp khác on screen 3 loops back to m1 and on screen 6 ends at stop3 (a loop-back from d_rej to m1 makes Mermaid render the diagram upside down); added automatic retry s9 with max 3 retries, after which s8 feeds d_retry, where Thử lại starts a new cycle and Đóng ends at stop2 via a_close; e1 moved before d_api and d_api rewritten; added BR-RET-03). The first rows below were run on v0.4 and need a re-run by the author; the Claude rows cover the structural checks on v0.9.
+The diagram changed from v0.5 to v0.9 (added d_fe and d_rej so that Chọn tệp khác on screen 3 loops back to m1 and on screen 6 ends at stop3 (a loop-back from d_rej to m1 makes Mermaid render the diagram upside down); added automatic retry s9 with max 3 retries, after which s8 feeds d_retry, where Thử lại starts a new cycle and Đóng ends at stop2 via a_close; e1 moved before d_api and d_api rewritten; added BR-RET-03). After v0.9, d_rej [choose another file] was changed from the flow final stop3 to a loop-back to m1 (stop3 removed), and the initial node was renamed start to a_0start so that the Mermaid layout no longer renders the diagram upside down. The first rows below were run on v0.4 and need a re-run by the author; the Claude rows cover the structural checks on v0.9.
 
 | Check | Result | By | Date |
 | :---- | :---- | :---- | :---- |
