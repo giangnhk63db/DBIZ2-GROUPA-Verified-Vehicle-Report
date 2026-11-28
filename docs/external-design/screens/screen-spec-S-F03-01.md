@@ -21,6 +21,7 @@
 **The user leaves this screen when:** the car owner goes back to S-F01-02 with the Back arrow of the Top bar, or closes the success popup after the sale request has been sent, which takes the car owner to S-F03-03.
 
 ## 2. Mockup
+
 ![S-F03-01](img/S-F03-01-default.png)
 
 | Default, numbered | Loading, numbered | Error validate FE, numbered | Error API, numbered | Success, numbered |
