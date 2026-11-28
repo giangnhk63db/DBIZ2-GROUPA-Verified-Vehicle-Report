@@ -41,7 +41,7 @@ swimlane-beta TB
    d0{"Does SoH need to be recalculated? (no result yet, new valid charging session, or 30 days since last calculation)"}
    m1{" "}
    s1("Request charging session telemetry and battery metrics (FR-01-08-BE)")
-   d1{"Did the charging logs & data API respond successfully? (no timeout, data valid)"}
+   d1{"Did the charging logs and data API respond successfully? (no timeout, data valid)"}
    s4("Wait 2 seconds, then retry (max 3 retries) (FR-01-08-BE)")
    d2{"Valid sessions in V1 to V2 window >= 3?"}
    s3("Calculate SoH using charging time ratio from V1 to V2 (FR-01-08-BE)")
