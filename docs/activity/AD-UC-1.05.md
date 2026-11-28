@@ -14,7 +14,7 @@
 | Failure end state(s) | `stop1` (via `s1` or `s7`): invoice file is rejected due to invalid format/size, or the Electronic Invoice Portal returns an invalid status; an error message is shown, nothing is merged, and the car owner closes the popup. `stop3`: the Portal returns an invalid status (or the file is rejected) and the car owner chooses Chọn tệp khác on the popup, so the car owner returns to the upload step (a file rejected at validation loops back to `m1` instead). `stop2`: the Portal API call fails on all 4 attempts (first attempt and 3 retries), the invoice is not merged and not rejected, and the car owner closes the Error API popup (the confirmed info stays on the screen) |
 | FRs covered | FR-01-05-FE, FR-01-05-BE, FR-01-06-BE, FR-01-07-INT, FR-01-07-BE |
 | Business rules applied | BR-FILE-01, BR-OCR-01, BR-INV-01, BR-RET-03 |
-| Version / status | v0.6 · Reviewed |
+| Version / status | v0.5 · Reviewed |
 | Author | Đinh Thu Thảo |
 
 ## 
@@ -57,7 +57,7 @@ swimlane-beta TB
     s4("Display extracted data on edit and confirmation screen, highlight low-confidence fields (FR-01-06-BE)")
     m3{" "}
     s5("Send invoice info via API to verify with Electronic Invoice Portal (FR-01-07-INT)")
-    d_api{"Did the Electronic Invoice Portal API respond successfully? (response within 5 seconds, valid)"}
+    d_api{"Did the Electronic Invoice Portal API respond successfully? (no timeout, response valid)"}
     s9("Wait 2 seconds, then retry (max 3 retries) (FR-01-07-INT)")
     s8("Max 3 retries exceeded: log error, notify API error and keep confirmed invoice info (FR-01-07-INT)")
     d3{"Invoice valid?"}
@@ -99,7 +99,7 @@ swimlane-beta TB
 - Extraction (XML vs OCR): The system detects the real file type. XML files are parsed directly from their tags (no OCR needed). PDF and image files go through text extraction or image preprocessing and OCR. In both cases the system extracts and normalizes four key fields: seller tax code, invoice number, total amount, and invoice date.
 - Extraction Result: If all four fields are extracted in a valid format, the data is displayed on the edit and confirmation screen for the car owner to review, edit if needed, and confirm (low-confidence fields are highlighted). If the file is unreadable or any field is missing or invalid, the system notifies the car owner and opens the manual entry screen, keeping any values it did extract.
 - Manual Entry or Re-upload: On the manual entry screen, the car owner chooses either to fill in the missing fields or enter all invoice info manually and confirm, or to choose another file, which returns to the upload step.
-- Authentication Check: After the car owner confirms (from review or manual entry), the system sends the invoice information via API to the Electronic Invoice Portal. The Portal verifies the invoice and its response goes back to the TASCO Mobility System, which checks (`d_api`) whether the API responded successfully (response within 5 seconds, valid). `d_api` is evaluated after every attempt, the same pattern as AD-UC-1.06.
+- Authentication Check: After the car owner confirms (from review or manual entry), the system sends the invoice information via API to the Electronic Invoice Portal. The Portal verifies the invoice and its response goes back to the TASCO Mobility System, which checks (`d_api`) whether the API responded successfully (no timeout, response valid). `d_api` is evaluated after every attempt, the same pattern as AD-UC-1.06.
 - Automatic retry loop (BR-RET-03): `retries done` counts the retries already made, not the attempts. After attempt 1, 2 or 3 fails, `retries done` is 0, 1 or 2 (below 3), so the system waits 2 seconds (`s9`, max 3 retries) and loops back to merge node `m3`, which sends the same confirmed info again. This gives 1 initial request plus 3 retries, 4 attempts in total, the same limit as AD-UC-1.06. During the loop the invoice is neither accepted nor rejected. Each attempt times out after 5 seconds, so the worst case for one submission is about 26 seconds (4 attempts of 5 seconds plus 3 waits of 2 seconds).
 - API Error after retries: If the 4th attempt also fails (`3 retries used`), the loop stops. The system logs the error, notifies the car owner with the Error API popup, and keeps the confirmed invoice info (`s8`); the invoice is not merged and not rejected. The popup offers two choices (`d_retry`): Thử lại sends the confirmed info again and starts a new cycle of up to 4 attempts via `m3`; Đóng closes the popup, the car owner stays on the screen with the confirmed info, and the flow ends at `stop2`.
 - Result & Timeline Update: If the Portal responded and the invoice is valid, it is merged into the vehicle's maintenance history and the updated timeline is displayed; if the Portal responded with an invalid status (or the file was rejected at validation), an error message is shown (popup "Hóa đơn không tồn tại" with Đóng and Chọn tệp khác). An invalid status is a valid response, so it is never retried. After the rejection popup, the car owner either closes it (the flow ends at `stop1`) or chooses another file, which ends this flow at `stop3` and returns the car owner to the upload step (`d_rej`); the next upload starts again at `a2`. `stop3` is drawn as a flow final instead of a loop-back edge to `m1`, because that long loop makes Mermaid render the whole diagram upside down.
@@ -130,7 +130,7 @@ swimlane-beta TB
 | m3 | Merge | Merge confirmed invoice info from review and manual entry, the automatic retry path, and the retry path from the Error API popup | N/A (Control Node) |
 | s5 | Action | Send invoice info via API to verify with Electronic Invoice Portal | FR-01-07-INT / BR-INV-01 |
 | e1 | Action | Verify invoice and return authenticity result | FR-01-07-INT / BR-INV-01 |
-| d_api | Decision | Did the Electronic Invoice Portal API respond successfully? (response within 5 seconds, valid) | FR-01-07-INT / BR-INV-01, BR-RET-03 |
+| d_api | Decision | Did the Electronic Invoice Portal API respond successfully? (no timeout, response valid) | FR-01-07-INT / BR-INV-01, BR-RET-03 |
 | s9 | Action | Wait 2 seconds, then retry (max 3 retries) | FR-01-07-INT / BR-RET-03 |
 | s8 | Action | Max 3 retries exceeded: log error, notify API error and keep confirmed invoice info | FR-01-07-INT / BR-INV-01, BR-RET-03 |
 | d_retry | Decision | Retry or close? | FR-01-07-INT / BR-RET-03 |
