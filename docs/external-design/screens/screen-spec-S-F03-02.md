@@ -21,6 +21,7 @@
 **The user leaves this screen when:** the staff click the link "Xem xét" or "Xem" of a row, which opens that request in S-F03-03 (Sale Request Detail & Preliminary Quote), or click "Quay lại" (1), which returns to the previous page of Carpla CRM.
 
 ## 2. Mockup
+
 ![S-F03-02](img/S-F03-02-default.png)
 
 | Default, numbered | Loading, numbered |
