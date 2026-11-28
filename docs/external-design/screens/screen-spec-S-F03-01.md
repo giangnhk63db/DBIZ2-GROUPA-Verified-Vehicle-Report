@@ -1,6 +1,6 @@
-# **Screen Spec: S-F03-01 Submit sale request** 
+# creen Spec: S-F03-01 Submit sale request
 
-# **1\. Purpose**
+## 1. Purpose
 
 | Field | Value |
 | ----- | ----- |
@@ -20,7 +20,7 @@
 
 **The user leaves this screen when:** the car owner goes back to S-F01-02 with the Back arrow of the Top bar, or closes the success popup after the sale request has been sent, which takes the car owner to S-F03-03.
 
-## **2\. Mockup**
+## 2. Mockup
 ![S-F03-01](img/S-F03-01-default.png)
 
 | Default, numbered | Loading, numbered | Error validate FE, numbered | Error API, numbered | Success, numbered |
@@ -37,7 +37,7 @@
 
 Each number is the \# of the element inventory in section 3\. Elements 23 (banner) appear only in the loading state; elements 24 to 27 (popup) appear only in the Backend and API error and success states. All colours, fonts and corners come from the design tokens in [ui-conventions-car-owner](https://github.com/giangnhk63db/DBIZ-2_GROUP-A/blob/856166f4d066a07c84b66f96b604380801b82088/External%20Design/ui-conventions-car-owner.md)
 
-## **3\. Element inventory**
+## 3. Element inventory
 
 The sections "Thông tin xe đã xác minh" and "Tình trạng pháp lý" are read-only. The section "Thông tin bạn cần nhập" has 3 textboxes. The screen has no Upload, Date time or Security element. 
 
@@ -76,7 +76,7 @@ The sections "Thông tin xe đã xác minh" and "Tình trạng pháp lý" are re
 
 **Note**: `vehicle.`, `legal_status.`, `sale_request.` are the fields sourced from tables in the data source. The field names are proposed and will be finalized with the data dictionary.
 
-## **4\. States**
+## 4. States
 
 This screen is a form, so there is no Empty state. 
 
@@ -88,7 +88,7 @@ This screen is a form, so there is no Empty state.
 | Error API | Error popup (24 with warning icon, 28, 29, 30\) with title "Chưa gửi được yêu cầu", buttons "Thử lại" and "Đóng" (and X).  | The system could not create or send the sale request after the maximum retries to send to Tasco staff CRM web. |
 | Success  | Success popup (24 with check icon, 28, 30\) with title "Đã gửi yêu cầu", the message and button "Đóng" (and X). The content behind it cannot be used. | The sale request is created and forwarded to Tasco staff  (FR-03-03). A data field that has no record or API does not respond is attached as "No data" and does not cause an error (FR-03-02) |
 
-## **5\. Interactions and navigation**
+## 5. Interactions and navigation
 
 | \# | Element | User action | System response | Goes to screen |
 | ----- | ----- | ----- | ----- | ----- |
@@ -101,7 +101,7 @@ This screen is a form, so there is no Empty state.
 | 7 | Close (30) | tap (error or success popup) | Closes the popup. After an error the entered values are kept. After a success the screen closes. \[see section 9, question 3\] | stays after error; after success: S-F01-02 (to confirm) |
 | 8 | Close popup (28) | tap (error or success popup) | Same as Close (30) | same as Close (30) |
 
-## **6\. Screen-level rules**
+## 6. Screen-level rules
 
 | Rule ID | Rule | Source |
 | :---- | :---- | :---- |
@@ -117,7 +117,7 @@ This screen is a form, so there is no Empty state.
 | SR-010 | Formats: mileage 45.230 km; price 850.000.000 ₫; phone number 10 digits, for example 0901234567. | ui-conventions §2 |
 | SR-011 | The latest market price is not shown or sent from this screen. The system packages it for Carpla staff by itself; if no market price exists, the package is forwarded with the price marked as unavailable. | FR-03-03 |
 
-## **7\. Linked requirements**
+## 7. Linked requirements
 
 | FR ID (L2) | What this screen does for it | L3 work items (IDs as written in the Function List) |
 | ----- | ----- | ----- |
@@ -127,7 +127,7 @@ This screen is a form, so there is no Empty state.
 | FR-01-03 View Verified Minimum Mileage | Source of the value of element 7 | FR-01-03-FE, FR-01-03-INT  (not part of this screen) |
 | FR-01-10, FR-01-11, FR-01-12 (legal checks) | Source of the status values of elements 9, 10, 11 | FR-01-10-INT, FR-01-11-INT, FR-01-12-INT  (not part of this screen) |
 
-## **8\. Responsive and accessibility notes**
+## 8. Responsive and accessibility notes
 
 * Smallest supported width: 360px, single column, vertical scroll only; no horizontal scroll.  
 * On a narrow screen the cards and textboxes take the full card width. The button "Gửi yêu cầu bán xe" is full width.  
@@ -138,7 +138,7 @@ This screen is a form, so there is no Empty state.
 * Each textbox has its label (13, 16, 19\) linked to it for the screen reader; the inline error (25, 26, 27\) is announced when it appears.  
 * The loading banner and the popups must be readable by a screen reader (loading icon, check icon and warning icon have a text alternative).
 
-  ## **9\. Open questions**
+  ## 9. Open questions
 
 | \# | Question | Blocking? | Status |
 | ----- | ----- | ----- | ----- |
@@ -148,7 +148,7 @@ This screen is a form, so there is no Empty state.
 | 4 | \[NEEDS CLARIFICATION: when is FE validation triggered (on leaving the field, on typing, or on tap of Submit)? The button is inactive while errors are shown, so empty fields need to be checked before the first tap.\] | No | Open. Default: on leaving the field  |
 | 5 | \[NEEDS CLARIFICATION: what do the legal badges (9, 10, 11\) show when a portal returns "No data" (FR-03-02)? The mockup only defines "—" for loading.\] | No | Open. Default: the car owner’s screen never displays “No data” value. Badges 9, 10, 11 show “—” only while re-checking; after that they return to the last retrieved value in the car owner screen. “No data” is only attached to the vehicle report package sent to Tasco staff. |
 
-  ## **Completion checklist**
+  ## Completion checklist
 
 * \[x\] The mockup is a separate cropped image file, named with the Screen ID, at the frame width.   
 * \[x\] The numbered image exists, and its numbers match the \# column of the element inventory.  
