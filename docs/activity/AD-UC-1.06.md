@@ -8,7 +8,7 @@
 | Primary actor | Car Owner |
 | Lanes | Car Owner · TASCO Mobility System · Electronic Vehicle Charging Stations |
 | Inputs (L3-L5) | Context Diagram v1 · Use Case Diagram v1 · Sequence: SD-UC-1.06 · W1 rows (FR-01-08-FE, FR-01-08-BE, FR-01-08-INT) |
-| Trigger | Car owner selects view EV battery health status |
+| Trigger | Car owner selects "Xem chi tiết" in the battery health section of the vehicle status screen |
 | Preconditions | Vehicle profile exists in the system and charging session telemetry data is available |
 | Success end state | `stop1`: SoH is newly calculated and displayed with the success popup. `stop3`: SoH is displayed from the cached result (Default state, no popup) |
 | Alternative end state | `stop4`: fewer than 3 valid charging sessions, SoH is not calculated and the Empty state is displayed |
@@ -27,22 +27,22 @@
 swimlane-beta TB
  subgraph CAR["Car Owner"]
    start@{ shape: sm-circ }
-   a1("Select view EV battery health status (FR-01-08-FE)")
-   a2("View SoH metrics & reports with success popup 'Đã tính xong sức khỏe pin' (FR-01-08-FE)")
-   a3("View SoH metrics & reports in Default state, no popup (FR-01-08-FE)")
-   a4("View Empty state: insufficient data banner and placeholders (FR-01-08-FE)")
-   error_view("View error notification popup: 'Không kết nối được trạm sạc' (FR-01-08-FE)")
+   a1("Select 'Xem chi tiết' in the battery health section (FR-01-08-FE)")
+   a2("Display SoH metrics & reports with success popup 'Đã tính xong sức khỏe pin' (FR-01-08-FE)")
+   a3("Display SoH metrics & reports in Default state, no popup (FR-01-08-FE)")
+   a4("Display Empty state: insufficient data banner and placeholders (FR-01-08-FE)")
+   error_view("Display error notification popup: 'Không kết nối được trạm sạc' (FR-01-08-FE)")
    stop1@{ shape: fr-circ }
    stop2@{ shape: fr-circ }
    stop3@{ shape: fr-circ }
    stop4@{ shape: fr-circ }
  end
  subgraph SYS["TASCO Mobility System"]
-   d0{"Recalculation required? (new valid session since last calculation / no result yet / 30-day re-evaluation due)"}
+   d0{"Does SoH need to be recalculated? (no result yet, new valid charging session, or 30 days since last calculation)"}
    m1{" "}
    s1("Request charging session telemetry and battery metrics (FR-01-08-BE)")
-   d1{"API responded without timeout & charging session data and battery metrics valid?"}
-   s4("Wait 2 seconds, then retry (FR-01-08-BE)")
+   d1{"Did the charging logs & data API respond successfully? (no timeout, data valid)"}
+   s4("Wait 2 seconds, then retry (max 3 retries) (FR-01-08-BE)")
    d2{"Valid sessions in V1 to V2 window >= 3?"}
    s3("Calculate SoH using charging time ratio from V1 to V2 (FR-01-08-BE)")
    s2("Max 3 retries exceeded: log error & prepare notification (FR-01-08-BE)")
@@ -52,11 +52,11 @@ swimlane-beta TB
  end
 
  start --> a1 --> d0
- d0 -->|"[no recalculation needed, use cached SoH]"| a3 --> stop3
- d0 -->|"[recalculation required]"| m1
+ d0 -->|"[no, use cached SoH]"| a3 --> stop3
+ d0 -->|"[yes, recalculation required]"| m1
  m1 --> s1 --> e1 --> d1
  d1 -->|"[fail/timeout & retries done < 3]"| s4 --> m1
- d1 -->|"[data valid]"| d2
+ d1 -->|"[success, data valid]"| d2
  d1 -->|"[fail/timeout & retries done = 3]"| s2 --> error_view --> stop2
  d2 -->|"[valid sessions >= 3]"| s3 --> a2 --> stop1
  d2 -->|"[valid sessions < 3]"| a4 --> stop4
@@ -65,31 +65,31 @@ swimlane-beta TB
 
 **Reading notes:**
 
-* Cache check: After the Car Owner selects the battery health view, the system checks whether a recalculation is required (BR-SOH-04). If no new valid charging session exists since the last calculation, the cached SoH is shown in the Default state without the success popup (BR-SOH-05) and the flow ends at `stop3`.
+* Cache check: After the Car Owner selects "Xem chi tiết" in the battery health section, the system checks whether SoH needs to be recalculated (BR-SOH-04). If no new valid charging session exists since the last calculation, the cached SoH is displayed in the Default state without the success popup (BR-SOH-05) and the flow ends at `stop3`.
 * Telemetry request: If recalculation is required, the system requests charging session telemetry and battery metrics, and the request is forwarded to the Electronic Vehicle Charging Stations, which retrieve the charging logs and data (`s1 → e1`).
-* Response validation (`d1`): The response from the charging station is passed back to the TASCO Mobility System, which checks (in the SYS lane) that the API responded without timeout and that the charging session data and battery metrics are valid. `d1` is evaluated after every attempt.
-* Retry loop: `retries done` counts the retries already made, not the attempts. After attempt 1, 2 or 3 fails, `retries done` is 0, 1 or 2 (< 3), so the system waits 2 seconds (`s4`) and loops back via merge node `m1`. After the 4th attempt fails, `retries done = 3` and the loop stops. This gives 1 initial request + 3 retries = 4 attempts in total (BR-RET-02).
-* Minimum sessions check (`d2`): When the data is valid, the system counts valid charging sessions in the standard voltage window V1 to V2. If there are at least 3, SoH is computed (BR-SOH-02, BR-SOH-03) and shown with the success popup (BR-SOH-05), ending at `stop1`. If fewer than 3, SoH is not calculated and the Empty state is displayed, ending at `stop4`.
-* Error management: If all 4 attempts fail, a persistent error is logged and the connection failure popup is shown, terminating at dedicated end node `stop2`.
+* Response validation (`d1`): The response from the charging station is passed back to the TASCO Mobility System, which checks (in the SYS lane) whether the charging logs & data API responded successfully (no timeout, data valid). `d1` is evaluated after every attempt.
+* Retry loop: `retries done` counts the retries already made, not the attempts. After attempt 1, 2 or 3 fails, `retries done` is 0, 1 or 2 (< 3), so the system waits 2 seconds (`s4`, max 3 retries) and loops back via merge node `m1`. After the 4th attempt fails, `retries done = 3` and the loop stops. This gives 1 initial request + 3 retries = 4 attempts in total (BR-RET-02).
+* Minimum sessions check (`d2`): When the data is valid, the system counts valid charging sessions in the standard voltage window V1 to V2. If there are at least 3, SoH is computed (BR-SOH-02, BR-SOH-03) and displayed with the success popup (BR-SOH-05), ending at `stop1`. If fewer than 3, SoH is not calculated and the Empty state is displayed, ending at `stop4`.
+* Error management: If all 4 attempts fail, a persistent error is logged and the connection failure popup is displayed, terminating at dedicated end node `stop2`.
 
 2. ## **Node trace**
 
 | Node | Kind | Text | Traces to |
 | :---- | :---- | :---- | :---- |
-| a1 | Action | Select view EV battery health status | FR-01-08-FE |
-| d0 | Decision | Recalculation required? (new valid session since last calculation / no result yet / 30-day re-evaluation due) | FR-01-08-BE / BR-SOH-04 |
+| a1 | Action | Select 'Xem chi tiết' in the battery health section | FR-01-08-FE |
+| d0 | Decision | Does SoH need to be recalculated? (no result yet, new valid charging session, or 30 days since last calculation) | FR-01-08-BE / BR-SOH-04 |
 | m1 | Merge | Control node merging initial request path and retry loop-back path | N/A (Control Node) |
 | s1 | Action | Request charging session telemetry and battery metrics | FR-01-08-BE |
 | e1 | Action | Retrieve charging logs and data | FR-01-08-INT |
-| d1 | Decision | API responded without timeout & charging session data and battery metrics valid? | FR-01-08-BE / BR-RET-02 |
-| s4 | Action | Wait 2 seconds, then retry | FR-01-08-BE / BR-RET-02 |
+| d1 | Decision | Did the charging logs & data API respond successfully? (no timeout, data valid) | FR-01-08-BE / BR-RET-02 |
+| s4 | Action | Wait 2 seconds, then retry (max 3 retries) | FR-01-08-BE / BR-RET-02 |
 | d2 | Decision | Valid sessions in V1 to V2 window >= 3? | FR-01-08-BE / BR-SOH-02 |
 | s3 | Action | Calculate SoH using charging time ratio from V1 to V2: <br>$\text{SoH} = \frac{\text{Charging time from } V_1 \to V_2 \text{ (current)}}{\text{Charging time from } V_1 \to V_2 \text{ (new battery)}} \times 100\%$ | FR-01-08-BE / BR-SOH-01, BR-SOH-03, BR-SOH-04 |
-| a2 | Action | View SoH metrics & reports with success popup 'Đã tính xong sức khỏe pin' | FR-01-08-FE / BR-SOH-01, BR-SOH-05 |
-| a3 | Action | View SoH metrics & reports in Default state, no popup (cached result) | FR-01-08-FE / BR-SOH-01, BR-SOH-04, BR-SOH-05 |
-| a4 | Action | View Empty state: insufficient data banner and `—` placeholders | FR-01-08-FE / BR-SOH-02 |
+| a2 | Action | Display SoH metrics & reports with success popup 'Đã tính xong sức khỏe pin' | FR-01-08-FE / BR-SOH-01, BR-SOH-05 |
+| a3 | Action | Display SoH metrics & reports in Default state, no popup (cached result) | FR-01-08-FE / BR-SOH-01, BR-SOH-04, BR-SOH-05 |
+| a4 | Action | Display Empty state: insufficient data banner and `—` placeholders | FR-01-08-FE / BR-SOH-02 |
 | s2 | Action | Max 3 retries exceeded: log error & prepare notification | FR-01-08-BE / BR-RET-02 |
-| error_view | Action | View error notification popup: 'Không kết nối được trạm sạc' | FR-01-08-FE |
+| error_view | Action | Display error notification popup: 'Không kết nối được trạm sạc' | FR-01-08-FE |
 | stop1 | Final | End: SoH newly calculated and displayed | N/A (Control Node) |
 | stop2 | Final | End: error after max retries | N/A (Control Node) |
 | stop3 | Final | End: cached SoH displayed | N/A (Control Node) |
@@ -112,11 +112,11 @@ swimlane-beta TB
 
 | Branch | Given | When | Then |
 | :---- | :---- | :---- | :---- |
-| d0 [no recalculation needed, use cached SoH] | A cached SoH result exists, no new valid charging session since the last calculation, and the 30-day re-evaluation is not due | Car owner selects view EV battery health status | System skips the station request, displays the cached SoH in Default state without the success popup, and ends at stop3 |
-| d0 [recalculation required] | No SoH result exists yet, or at least one new valid charging session was recorded, or the 30-day re-evaluation is due | Car owner selects view EV battery health status | System enters merge node m1 and requests charging session telemetry and battery metrics |
-| d1 [fail/timeout & retries done < 3] | Charging data request sent to charging station (attempt 1, 2 or 3) | Station returns timeout, connection error, or inaccessible/invalid data | System waits 2 seconds, then loops back via merge node m1 to request data again |
-| d1 [data valid] | Charging data request sent to charging station (any attempt 1 to 4) | Station returns accessible and valid charging logs and battery metrics | System proceeds to check the number of valid charging sessions at d2 |
-| d1 [fail/timeout & retries done = 3] | Charging data request failed on attempts 1, 2 and 3, and 3 retries have been made | Station continues to return connection errors or invalid data on the 4th attempt | System stops retrying, logs error, shows the error popup 'Không kết nối được trạm sạc', and ends at stop2 |
+| d0 [no, use cached SoH] | A cached SoH result exists, no new valid charging session since the last calculation, and the 30-day re-evaluation is not due | Car owner selects "Xem chi tiết" in the battery health section | System skips the station request, displays the cached SoH in Default state without the success popup, and ends at stop3 |
+| d0 [yes, recalculation required] | No SoH result exists yet, or at least one new valid charging session was recorded, or the 30-day re-evaluation is due | Car owner selects "Xem chi tiết" in the battery health section | System enters merge node m1 and requests charging session telemetry and battery metrics |
+| d1 [fail/timeout & retries done < 3] | Charging data request sent to charging station (attempt 1, 2 or 3) | Station returns timeout, connection error, or inaccessible/invalid data | System waits 2 seconds, then loops back via merge node m1 to request data again (max 3 retries) |
+| d1 [success, data valid] | Charging data request sent to charging station (any attempt 1 to 4) | Station returns accessible and valid charging logs and battery metrics | System proceeds to check the number of valid charging sessions at d2 |
+| d1 [fail/timeout & retries done = 3] | Charging data request failed on attempts 1, 2 and 3, and 3 retries have been made | Station continues to return connection errors or invalid data on the 4th attempt | System stops retrying, logs error, displays the error popup 'Không kết nối được trạm sạc', and ends at stop2 |
 | d2 [valid sessions >= 3] | Valid charging data was retrieved | At least 3 valid charging sessions exist in the V1 to V2 window | System calculates SoH (rounded Round Half Up), classifies the grade, displays the report with the success popup, and ends at stop1 |
 | d2 [valid sessions < 3] | Valid charging data was retrieved | Fewer than 3 valid charging sessions exist in the V1 to V2 window | System does not calculate SoH, displays the Empty state with the insufficient data banner and `—` placeholders (no success popup), and ends at stop4 |
 
@@ -135,11 +135,11 @@ swimlane-beta TB
 
 | Actor action | Screen ID |
 | :---- | :---- |
-| Select view EV battery health status (a1) | S-F01-02 → S-F01-06 |
-| View SoH metrics & reports with success popup (a2) | S-F01-06 (Default state with success popup) |
-| View SoH metrics & reports in Default state, no popup (a3) | S-F01-06 (Default state) |
-| View Empty state: insufficient data banner (a4) | S-F01-06 (Empty state) |
-| View error notification popup: 'Không kết nối được trạm sạc' (error_view) | S-F01-06 (Error notification (BE) popup) |
+| Select 'Xem chi tiết' in the battery health section (a1) | S-F01-02 → S-F01-06 |
+| Display SoH metrics & reports with success popup (a2) | S-F01-06 (Default state with success popup) |
+| Display SoH metrics & reports in Default state, no popup (a3) | S-F01-06 (Default state) |
+| Display Empty state: insufficient data banner (a4) | S-F01-06 (Empty state) |
+| Display error notification popup: 'Không kết nối được trạm sạc' (error_view) | S-F01-06 (Error notification (BE) popup) |
 
 ## 
 
