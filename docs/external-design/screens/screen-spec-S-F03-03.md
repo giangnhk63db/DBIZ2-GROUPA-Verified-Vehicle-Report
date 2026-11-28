@@ -1,6 +1,6 @@
-# **Screen Spec: S-F03-03 Sale Request Detail & Preliminary Quote**
+# Screen Spec: S-F03-03 Sale Request Detail & Preliminary Quote
 
-# **1\. Purpose**
+## 1. Purpose
 
 | Field | Value |
 | ----- | ----- |
@@ -20,7 +20,8 @@
 
 **The user leaves this screen when:** the staff click "Quay lại" (element 1 or element 29), which returns to S-F03-02, or close the success popup after the quote has been sent, which also returns to S-F03-02 (section 9, question 3).
 
-## **2\. Mockup**
+## 2. Mockup
+
 | Default quoted | Default unquoted |
 | ----- | ----- |
 | ![S-F03-03](img/S-F03-03-default-quoted.png) | ![S-F03-03](img/S-F03-03-default-unquoted.png) |
@@ -58,7 +59,7 @@
 
 Each number is the \# of the element inventory in section 3. The numbers are the same in all states, and an element that does not appear in a state is not numbered on its image. In the default quoted state the elements 26 and 28 are read-only text instead of inputs. All colours, fonts, spacing and corners come from the design tokens in [ui-conventions-carpla-staff.md](ui-conventions-carpla-staff.md).
 
-## **3\. Element inventory**
+## 3. Element inventory
 
 The report part of the screen (elements 3 to 23, and 31) is read-only: it has no Input element. The only inputs are the two Text inputs of the Quote form (elements 26, 28), and only while the request has no quote yet; in the quoted state they are read-only text (element 39 shows the status). The screen has no Upload, Date time or Security element. The controls are the two Back controls (1, 29), the invoice link (23), the two Text inputs (26, 28), the button "Gửi báo giá" (30) and the popup buttons (37, 38). In the quoted state only the Back controls (1, 29) and the invoice link (23) can be used.
 
@@ -106,7 +107,7 @@ The report part of the screen (elements 3 to 23, and 31) is read-only: it has no
 
 **Note**: `sale_request.`, `vehicle.`, `legal_status.`, `market_price.`, `maintenance_record.` and `quote.` are the fields sourced from tables in the data source. The field names are proposed and will be finalized with the data dictionary. Element 4 is read from the car owner account in Tasco Mobility app, not from `sale_request.`.
 
-## **4\. States**
+## 4. States
 
 Seven states are drawn. The report part of the screen is the same in the six states that show data; the states differ in the Maintenance table, the Default unquoted and the popups.
 
@@ -136,7 +137,7 @@ Seven states are drawn. The report part of the screen is the same in the six sta
 | A long owner name, model or description | The text wraps inside its cell or row, the row grows; the other columns keep their width |
 | A row from an external invoice | Source cell shows "Hóa đơn bên ngoài · Xem hóa đơn"; the link (23) opens the file in a new tab. A Carpla Service row has no link |
 
-## **5\. Interactions and navigation**
+## 5. Interactions and navigation
 
 | \# | Element | User action | System response | Goes to screen |
 | ----- | ----- | ----- | ----- | ----- |
@@ -151,7 +152,7 @@ Seven states are drawn. The report part of the screen is the same in the six sta
 | 9 | Close (38), error popup | tap | Closes the popup; the entered values are kept; the staff can correct and send again or leave with Back | stays |
 | 10 | Close (38), success popup | tap | Closes the popup and leaves the screen (section 9, question 3) | S-F03-02 |
 
-## **6\. Screen-level rules**
+## 6. Screen-level rules
 
 | Rule ID | Rule | Source |
 | :---- | :---- | :---- |
@@ -171,7 +172,7 @@ Seven states are drawn. The report part of the screen is the same in the six sta
 | SR-014 | The screen scrolls vertically only. Smallest supported width is 1280px. | ui-conventions sections 5 and 6.5 |
 | SR-015 | A request that already has a quote (status "Đã gửi báo giá") opens in the state Quoted: the stored range is read-only (26, 28) with the badge (39), "Gửi báo giá" (30) is not shown, and the staff cannot send another quote. | FR-03-05, UC-3.08, S-F03-02 SR-004 |
 
-## **7\. Linked requirements**
+## 7. Linked requirements
 
 | FR ID (L2) | What this screen does for it | L3 work items (IDs as written in the Function List) |
 | ----- | ----- | ----- |
@@ -185,7 +186,7 @@ Seven states are drawn. The report part of the screen is the same in the six sta
 | FR-01-10, FR-01-11, FR-01-12, FR-01-13 (legal checks) | Source of the status values of elements 16, 17, 18 | FR-01-10-INT, FR-01-11-INT, FR-01-12-INT, FR-01-13-BE|
 | FR-01-04, FR-01-05, FR-01-07 (maintenance history and external invoices) | Source of the rows of the maintenance table (22) and of the invoice link (23) | FR-01-04-FE, FR-01-05-FE, FR-01-07-FE, BE is not part of this screen |
 
-## **8\. Responsive and accessibility notes**
+## 8. Responsive and accessibility notes
 
 * Smallest supported width: 1280px, desktop web browser, vertical scroll only; no horizontal scroll. The two Text inputs of the Quote form sit side by side. In the panels the label is on the left and the value on the right; the identification panel has three columns.  
 * Information is never carried by colour alone: the Status badges have an icon and text, the inline error has an icon and text, the popup has an icon and text, the quote status badge (39) has an icon and text, the links are underlined, and the invalid input also gets an error border together with the text (35).  
@@ -196,7 +197,7 @@ Seven states are drawn. The report part of the screen is the same in the six sta
 * The data tables and panels use real header and label cells for the screen reader. Each invoice link has an accessible name that includes the date, for example "Xem hóa đơn ngày 02/06/2026", because the visible text "Xem hóa đơn" is the same in every row.  
 * The loading line (33) is announced as a status message. The popup (36) takes the focus when it opens, keeps it inside until it closes, and returns it to the screen afterwards. The check, warning and error icons have a text alternative.
 
-## **9\. Open questions**
+## 9. Open questions
 
 | \# | Question | Blocking? | Status |
 | ----- | ----- | ----- | ----- |
@@ -209,7 +210,7 @@ Seven states are drawn. The report part of the screen is the same in the six sta
 | 7 | \[NEEDS CLARIFICATION: should the state Quoted also show when the quote was sent (date and time) or by whom? The Function List has no such field and the mockup shows only the badge (39) and the two prices.\] | No | Open. Default: not shown. This feature will be extend in the future to develop gradually user experience |
 | 8 | \[NEEDS CLARIFICATION: where does the stored quote (quote.price\_min, quote.price\_max) come from when the staff reopen the request? FR-03-04-BE lists the package without the quote, and FR-03-05-BE only stores it.\] | No | Open. Default: the read of the package (FR-03-04-BE) also returns the stored quote when one exists. To be more clear, we decide add an L3 item "API read the stored quote". |
 
-## **Completion checklist**
+## Completion checklist
 
 * \[x\] The mockup is a separate cropped image file, named with the Screen ID, at the frame width.  
 * \[x\] The numbered image exists, and its numbers match the \# column of the element inventory. (Six files exist, numbers 1 to 38 checked.  
