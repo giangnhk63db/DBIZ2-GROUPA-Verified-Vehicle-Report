@@ -1,4 +1,4 @@
-# **Screen List:**
+# Screen List: Verified Vehicle Report
 
 Screen ID pattern: S-\<feature\>-\<nn\>, for example S-F01-02 is the second screen of feature F-01. Screens shared by every feature (sign in, settings) use S-F00-\<nn\>.
 
@@ -15,9 +15,9 @@ Screen ID pattern: S-\<feature\>-\<nn\>, for example S-F01-02 is the second scre
 | S-F03-02 | Sale Request List | Carpla Staff | F-03 | Shown when Carpla staff open the sale request list in Carpla CRM. Displays all sale requests sent by car owners. The staff selects a request to open its detail. | Carpla CRM menu; S-F03-01 (a submitted request appears in this list) | UC-3.07; FR-03-04-FE, FR-03-04-BE | Must |  |
 | S-F03-03 | Sale Request Detail & Preliminary Quote | Carpla Staff | F-03 | Shown when Carpla staff select a sale request in S-F03-02. Displays the packaged verified report: car owner declared information and fully verified vehicle report. The staff inputs a suggested quote range and sends it to the car owner. | S-F03-02 | UC-3.07, UC-3.08; FR-03-04-FE, FR-03-04-BE, FR-03-05-FE, FR-03-05-BE | Must |  |
 | S-F03-04 | View Preliminary Quote | Car Owner | F-03 | Displays the preliminary quote once Carpla staff has sent it, otherwise that the request is in the status of waiting for Carpla. | S-F03-03, S-F03-01 | UC-3.09; FR-03-06-FE, FR-03-06-BE | Should |  |
-## 
 
-## **Modals and overlays**
+
+## Modals and overlays
 
 | Modal | Opened from screen | Purpose | Note |
 | ----- | ----- | ----- | ----- |
@@ -39,8 +39,6 @@ Screen ID pattern: S-\<feature\>-\<nn\>, for example S-F01-02 is the second scre
 | UC-2.11 Stop Market Price Tracking | Could | Could priority, not designed in this release. |
 | UC-3.06 Package & Forward Verified Report and Market Price to Carpla Staff | Must | Started by the system after the legal re-check. The car owner only gets a notification when forwarding fails (AD-UC-3.06). |
 | UC-3.03, UC-3.04, UC-3.05 | Should | Run inside the legal re-check (UC-3.02) when the sale request is submitted. The car owner only sees the result of the submit on S-F03-01.. |
-
-## 
 
 ## **Checks before you save**
 
