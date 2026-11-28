@@ -14,7 +14,7 @@
 | Failure end state(s) | `stop1` (via `s1` or `s7`): invoice file is rejected due to invalid format/size, or the Electronic Invoice Portal returns an invalid status; an error message is shown, nothing is merged, and the car owner closes the popup. `stop3`: the Portal returns an invalid status (or the file is rejected) and the car owner chooses Chọn tệp khác on the popup, so the car owner returns to the upload step (a file rejected at validation loops back to `m1` instead). `stop2`: the Portal API call fails on all 4 attempts (first attempt and 3 retries), the invoice is not merged and not rejected, and the car owner closes the Error API popup (the confirmed info stays on the screen) |
 | FRs covered | FR-01-05-FE, FR-01-05-BE, FR-01-06-BE, FR-01-07-INT, FR-01-07-BE |
 | Business rules applied | BR-FILE-01, BR-OCR-01, BR-INV-01, BR-RET-03 |
-| Version / status | v0.9 · Updated after review comments (pending re-review) |
+| Version / status | v0.6 · Reviewed |
 | Author | Đinh Thu Thảo |
 
 ## 
