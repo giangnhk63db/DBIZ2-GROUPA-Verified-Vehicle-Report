@@ -1,4 +1,4 @@
-# creen Spec: S-F03-01 Submit sale request
+# Screen Spec: S-F03-01 Submit sale request
 
 ## 1. Purpose
 
